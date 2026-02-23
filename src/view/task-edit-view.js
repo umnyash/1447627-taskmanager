@@ -141,12 +141,14 @@ function createTaskEditTemplate(data) {
 }
 
 export default class TaskEditView extends AbstractView {
+  #task = null;
+
   constructor({ task = BLANK_TASK }) {
     super();
-    this.task = task;
+    this.#task = task;
   }
 
   get template() {
-    return createTaskEditTemplate(this.task);
+    return createTaskEditTemplate(this.#task);
   }
 }

@@ -69,12 +69,14 @@ function createTaskTemplate(task) {
 }
 
 export default class TaskView extends AbstractView {
+  #task = null;
+
   constructor({ task }) {
     super();
-    this.task = task;
+    this.#task = task;
   }
 
   get template() {
-    return createTaskTemplate(this.task);
+    return createTaskTemplate(this.#task);
   }
 }
