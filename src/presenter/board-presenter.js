@@ -29,9 +29,14 @@ export default class BoardPresenter {
     render(new TaskEditView({ task: this.#boardTasks[0] }), this.#taskListComponent.element);
 
     for (let i = 1; i < this.#boardTasks.length; i++) {
-      render(new TaskView({ task: this.#boardTasks[i] }), this.#taskListComponent.element);
+      this.#renderTask(this.#boardTasks[i]);
     }
 
     render(new LoadMoreButtonView(), this.#boardComponent.element);
+  }
+
+  #renderTask(task) {
+    const taskComponent = new TaskView({ task });
+    render(taskComponent, this.#taskListComponent.element);
   }
 }
