@@ -1,4 +1,4 @@
-import { render, remove } from '../framework/render.js';
+import { render, replace, remove } from '../framework/render.js';
 import BoardView from '../view/board-view.js';
 import SortView from '../view/sort-view.js';
 import TaskListView from '../view/task-list-view.js';
@@ -30,9 +30,8 @@ export default class BoardPresenter {
     render(this.#boardComponent, this.#boardContainer);
     render(new SortView(), this.#boardComponent.element);
     render(this.#taskListComponent, this.#boardComponent.element);
-    render(new TaskEditView({ task: this.#boardTasks[0] }), this.#taskListComponent.element);
 
-    for (let i = 1; i < Math.min(this.#boardTasks.length, TASK_COUNT_PER_STEP); i++) {
+    for (let i = 0; i < Math.min(this.#boardTasks.length, TASK_COUNT_PER_STEP); i++) {
       this.#renderTask(this.#boardTasks[i]);
     }
 
@@ -57,7 +56,38 @@ export default class BoardPresenter {
   };
 
   #renderTask(task) {
-    const taskComponent = new TaskView({ task });
+    const escKeyDownHandler = (evt) => {
+      if (evt.key === 'Escape') {
+        evt.preventDefault();
+        replaceFormToCard();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
+    };
+
+    const taskComponent = new TaskView({
+      task,
+      onEditClick: () => {
+        replaceCardToForm();
+        document.addEventListener('keydown', escKeyDownHandler);
+      },
+    });
+
+    const taskEditComponent = new TaskEditView({
+      task,
+      onFormSubmit: () => {
+        replaceFormToCard();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      },
+    });
+
+    function replaceCardToForm() {
+      replace(taskEditComponent, taskComponent);
+    }
+
+    function replaceFormToCard() {
+      replace(taskComponent, taskEditComponent);
+    }
+
     render(taskComponent, this.#taskListComponent.element);
   }
 }
