@@ -6,6 +6,8 @@ import LoadMoreButtonView from '../view/load-more-button-view.js';
 import NoTaskView from '../view/no-task-view.js';
 import TaskPresenter from './task-presenter.js';
 import { updateItem } from '../utils/common.js';
+import { sortTaskUp, sortTaskDown } from '../utils/task.js';
+import { SortType } from '../const.js';
 
 const TASK_COUNT_PER_STEP = 8;
 
@@ -16,12 +18,14 @@ export default class BoardPresenter {
   #boardComponent = new BoardView();
   #taskListComponent = new TaskListView();
   #loadMoreButtonComponent = null;
-  #sortComponent = new SortView();
+  #sortComponent = null;
   #noTaskComponent = new NoTaskView();
 
   #boardTasks = [];
   #renderedTaskCount = TASK_COUNT_PER_STEP;
   #taskPresenters = new Map();
+  #currentSortType = SortType.DEFAULT;
+  #sourceBoardTasks = [];
 
   constructor({ boardContainer, tasksModel }) {
     this.#boardContainer = boardContainer;
@@ -30,6 +34,7 @@ export default class BoardPresenter {
 
   init() {
     this.#boardTasks = [...this.#tasksModel.tasks];
+    this.#sourceBoardTasks = [...this.#tasksModel.tasks];
     this.#renderBoard();
   }
 
@@ -47,10 +52,40 @@ export default class BoardPresenter {
 
   #handleTaskChange = (updatedTask) => {
     this.#boardTasks = updateItem(this.#boardTasks, updatedTask);
+    this.#sourceBoardTasks = updateItem(this.#sourceBoardTasks, updatedTask);
     this.#taskPresenters.get(updatedTask.id).init(updatedTask);
   };
 
+  #sortTasks(sortType) {
+    switch (sortType) {
+      case SortType.DATE_UP:
+        this.#boardTasks.sort(sortTaskUp);
+        break;
+      case SortType.DATE_DOWN:
+        this.#boardTasks.sort(sortTaskDown);
+        break;
+      default:
+        this.#boardTasks = [...this.#sourceBoardTasks];
+    }
+
+    this.#currentSortType = sortType;
+  }
+
+  #handleSortTypeChange = (sortType) => {
+    if (this.#currentSortType === sortType) {
+      return;
+    }
+
+    this.#sortTasks(sortType);
+    this.#clearTaskList();
+    this.#renderTaskList();
+  };
+
   #renderSort() {
+    this.#sortComponent = new SortView({
+      onSortTypeChange: this.#handleSortTypeChange,
+    });
+
     render(this.#sortComponent, this.#boardComponent.element, RenderPosition.AFTERBEGIN);
   }
 
