@@ -5,6 +5,7 @@ import TaskListView from '../view/task-list-view.js';
 import LoadMoreButtonView from '../view/load-more-button-view.js';
 import NoTaskView from '../view/no-task-view.js';
 import TaskPresenter from './task-presenter.js';
+import { updateItem } from '../utils/common.js';
 
 const TASK_COUNT_PER_STEP = 8;
 
@@ -40,6 +41,11 @@ export default class BoardPresenter {
     }
   };
 
+  #handleTaskChange = (updatedTask) => {
+    this.#boardTasks = updateItem(this.#boardTasks, updatedTask);
+    this.#taskPresenters.get(updatedTask.id).init(updatedTask);
+  };
+
   #renderSort() {
     render(this.#sortComponent, this.#boardComponent.element, RenderPosition.AFTERBEGIN);
   }
@@ -47,6 +53,7 @@ export default class BoardPresenter {
   #renderTask(task) {
     const taskPresenter = new TaskPresenter({
       taskListContainer: this.#taskListComponent.element,
+      onDataChange: this.#handleTaskChange,
     });
     taskPresenter.init(task);
     this.#taskPresenters.set(task.id, taskPresenter);
