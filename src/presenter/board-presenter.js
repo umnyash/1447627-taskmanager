@@ -68,6 +68,13 @@ export default class BoardPresenter {
     render(this.#loadMoreButtonComponent, this.#boardComponent.element);
   }
 
+  #clearTaskList() {
+    this.#taskPresenters.forEach((presenter) => presenter.destroy());
+    this.#taskPresenters.clear();
+    this.#renderedTaskCount = TASK_COUNT_PER_STEP;
+    remove(this.#loadMoreButtonComponent);
+  }
+
   #renderTaskList() {
     render(this.#taskListComponent, this.#boardComponent.element);
     this.#renderTasks(0, Math.min(this.#boardTasks.length, TASK_COUNT_PER_STEP));
